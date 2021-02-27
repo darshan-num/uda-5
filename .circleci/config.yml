@@ -40,12 +40,13 @@ jobs:
           command: |
             . venv/bin/activate
             make lint 
+            source deactivate
     # Install other dependencies
       - run:
           name: Install cli 2, docker & eksctl
           command: |
             deactivate
-            
+
             echo "update"
             sudo apt-get update
 
