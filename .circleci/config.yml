@@ -7,6 +7,10 @@ version: 2.1
 orbs:
   aws-cli: circleci/aws-cli@0.1.19
   slack: circleci/slack@3.4.2
+  aws-eks: circleci/aws-eks@0.2.3
+  kubernetes: circleci/kubernetes@0.4.0
+  docker: circleci/docker@1.5.0
+
 jobs:
   build:
     docker:
@@ -16,50 +20,6 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-
-    # # Download and cache dependencies
-    #   - restore_cache:
-    #       keys:
-    #         - v1-dependencies-{{ checksum "requirements.txt" }}
-    #         # fallback to using the latest cache if no exact match is found
-    #         - v1-dependencies-
-
-    #   - run:
-    #       name: install dependencies
-    #       command: |
-    #         python3 -m venv venv
-    #         . venv/bin/activate
-    #         make install
-    #         wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
-    #         chmod +x /bin/hadolint
-    #   - save_cache:
-    #       paths:
-    #         - ./venv
-    #       key: v1-dependencies-{{ checksum "requirements.txt" }}
-
-    # # run lint!
-    #   - run:
-    #       name: run lint
-    #       command: |
-    #         . venv/bin/activate
-    #         make lint 
-    # Install other dependencies
-    # curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" 
-    # unzip awscliv2.zip
-    # sudo ./aws/install
-      - run: sudo su
-      - run: apt-get install -y sudo # https://discuss.circleci.com/t/sudo-command-not-found/14208/4
-      - run: ls -al /bin/sh && sudo rm /bin/sh && sudo ln -s /bin/bash /bin/sh && ls -al /bin/sh
-      - run:
-          name: Install cli 2, docker & eksctl
-          command: |
-            sudo apt install apt-transport-https ca-certificates curl software-properties-common
-            sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-            sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
-            sudo apt install docker-ce
-            
-            chmod +x install_dependencies.sh
-            ./install_dependencies.sh
     # Build Docker image
       - run:
           name: Build and deploy docker image
