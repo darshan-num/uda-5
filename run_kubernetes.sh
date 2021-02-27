@@ -1,9 +1,10 @@
 # Step 1:
 #Fetch cluster arn 
-sudo apt-get install jq
-aws ecs describe-clusters --cluster default | jq . > output_arn.json
-clusterarn=jq ".clusters[].clusterArn" output_arn.json
-echo $clusterarn
+# sudo apt-get install jq
+# aws ecs describe-clusters --cluster default | jq . > output_arn.json
+# clusterarn=jq ".clusters[].clusterArn" output_arn.json
+# echo $clusterarn
+clusterarn=arn:aws:eks:us-east-2:450295081108:cluster/prod
 
 # Step 2:
 # Assign variables

@@ -6,10 +6,7 @@ This project's goal is to operationalize this working, machine learning microser
 In this project we have:
 * Implemented code linting
 * Provided a Dockerfile to containerize this application
-* Deployed docker container on Dockerhub and made a prediction
-* Add logs for app.py
 * Provided a bash script to configure and create a Kubernetes cluster
-
 
 ## Project Instructions
 Use the following steps to start the project
@@ -19,25 +16,23 @@ Use the following steps to start the project
 ### Running `app.py`
 `python app.py`
 
-## Project File structure
-Main files to build kubernetes and docker container are,
+## Building and pushing docker image
 
-Main application - app.py
-Requirements - requirements.txt
-Circleci config - .circleci/config.yml
+ - run -> ./build_and_push_docker.sh - Builds the docker image and pushes it to docker hub
 
-1. Run in Docker:  `./run_docker.sh`
-2. Run in Kubernetes:  `./run_kubernetes.sh`
+## Create a EKS cluster
+Command will create a eks cluster named "prod" having min 1 and max 3 resources 
+Size = t3.micro
 
-We can proceed to commit and push this docker container to dockerhub using,
+- run -> ./create_cluster.sh - Creates EKS cluster with nodegroups having 2 pods
 
-1. Upload Docker:  `./upload_docker.sh`
+## Deploy clean docker image to kubernets 
 
-We can make the predictions using,
+- run -> ./run_kubernetes.sh - Deploy docker image to the kubernetes cluster 
 
-1. Make predictions:  `./make_prediction.sh`
+Uses the eks-cluster.yml manifest file for kubernetes deployement
 
-Logs are maintained at,
 
-1. Docker container Logs:  `docker_out.txt`
-2. Kubernetes Logs:  `kubernetes_out.txt`
+
+
+
