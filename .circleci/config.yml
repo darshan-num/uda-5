@@ -7,10 +7,6 @@ orbs:
 version: 2
 jobs:
   build:
-    docker:
-      # Use the same Docker base as the project
-      - image: python:3.7.3-stretch
-
     working_directory: ~/repo
 
     steps:
@@ -49,7 +45,12 @@ jobs:
       - run:
           name: Install cli 2, docker & eksctl
           command: |
-            docker info
+            sudo apt install apt-transport-https ca-certificates curl software-properties-common
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+            sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+            sudo apt install docker-ce
+            sudo systemctl status docker
+
             chmod +x install_dependencies.sh
             ./install_dependencies.sh
     # Build Docker image
