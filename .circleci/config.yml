@@ -2,47 +2,41 @@
 #
 # Check https://circleci.com/docs/2.0/language-python/ for more details
 #
-
-version: 2.1
-orbs:
-  aws-cli: circleci/aws-cli@0.1.19
-  slack: circleci/slack@3.4.2
-  aws-eks: circleci/aws-eks@0.2.3
-  kubernetes: circleci/kubernetes@0.4.0
-  docker: circleci/docker@1.5.0
-
+version: 2
 jobs:
   build:
     docker:
       # Use the same Docker base as the project
-      - image: circleci/python:3.6.1
+      - image: python:3.7.3-stretch
 
     working_directory: ~/repo
+
     steps:
       - checkout
-    # Build Docker image
-      - run:
-          name: Build and deploy docker image
-          command: |
-            service docker start
-            chmod +x build_and_push_docker.sh
-            docker login --username $DOCKERUSERNAME --password $DOCKERPASS
-            ./build_and_push_docker.sh
 
-    # Create EKS cluster
-      - run:
-          name: Create EKS cluster
-          command: |
-            ./create_cluster.sh
+    # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
 
-    # Deploy docker image to EKS cluster
       - run:
-          name: Deploy EKS image
+          name: install dependencies
           command: |
-            ./run_kubernetes.sh
+            python3 -m venv venv
+            . venv/bin/activate
+            make install
+            wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
+            chmod +x /bin/hadolint
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-    # Cleanup
+    # run lint!
       - run:
-          name: Cleanup
+          name: run lint
           command: |
-            eksctl delete cluster prod
+            . venv/bin/activate
+            make lint 
