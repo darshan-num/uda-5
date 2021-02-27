@@ -40,11 +40,12 @@ jobs:
           command: |
             . venv/bin/activate
             make lint 
-
     # Install other dependencies
       - run:
           name: Install cli 2, docker & eksctl
           command: |
+            deactivate
+            
             echo "update"
             sudo apt-get update
 
@@ -61,8 +62,6 @@ jobs:
             curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
             sudo mv /tmp/eksctl /usr/local/bin
             eksctl version
-
-
     # Build Docker image
       - run:
           name: Build and deploy docker image
