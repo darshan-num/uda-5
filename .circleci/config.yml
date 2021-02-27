@@ -14,38 +14,36 @@ jobs:
     steps:
       - checkout
 
-    # Download and cache dependencies
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "requirements.txt" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
+    # # Download and cache dependencies
+    #   - restore_cache:
+    #       keys:
+    #         - v1-dependencies-{{ checksum "requirements.txt" }}
+    #         # fallback to using the latest cache if no exact match is found
+    #         - v1-dependencies-
 
-      - run:
-          name: install dependencies
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            make install
-            wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
-            chmod +x /bin/hadolint
-      - save_cache:
-          paths:
-            - ./venv
-          key: v1-dependencies-{{ checksum "requirements.txt" }}
+    #   - run:
+    #       name: install dependencies
+    #       command: |
+    #         python3 -m venv venv
+    #         . venv/bin/activate
+    #         make install
+    #         wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
+    #         chmod +x /bin/hadolint
+    #   - save_cache:
+    #       paths:
+    #         - ./venv
+    #       key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-    # run lint!
-      - run:
-          name: run lint
-          command: |
-            . venv/bin/activate
-            make lint 
-            source deactivate
+    # # run lint!
+    #   - run:
+    #       name: run lint
+    #       command: |
+    #         . venv/bin/activate
+    #         make lint 
     # Install other dependencies
       - run:
           name: Install cli 2, docker & eksctl
           command: |
-            deactivate
 
             echo "update"
             sudo apt-get update
