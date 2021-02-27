@@ -47,11 +47,13 @@ jobs:
       - run:
           name: Install cli 2, docker & eksctl
           command: |
+            chmod +x install_dependencies.sh
             ./install_dependencies.sh
     # Build Docker image
       - run:
           name: Build and deploy docker image
           command: |
+            chmod +x build_and_push_docker.sh
             docker login --username $DOCKERUSERNAME --password $DOCKERPASS
             ./build_and_push_docker.sh
 
