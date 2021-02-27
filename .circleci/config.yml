@@ -1,0 +1,89 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      # Use the same Docker base as the project
+      - image: python:3.7.3-stretch
+
+    working_directory: ~/repo
+
+    steps:
+      - checkout
+
+    # Download and cache dependencies
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
+
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            make install
+            wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
+            chmod +x /bin/hadolint
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+    # run lint!
+      - run:
+          name: run lint
+          command: |
+            . venv/bin/activate
+            make lint 
+
+    # Install other dependencies
+      - run:
+          name: Install cli 2, docker & eksctl
+          command: |
+            echo "update"
+            sudo apt-get update
+
+            echo "Installing cli 2"
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" 
+            unzip awscliv2.zip
+            sudo ./aws/install
+
+            echo "Installing docker"
+            sudo apt-get install docker-ce docker-ce-cli containerd.io
+            apt-cache madison docker-ce
+            
+            echo "Installing eksctl"
+            curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+            sudo mv /tmp/eksctl /usr/local/bin
+            eksctl version
+
+
+    # Build Docker image
+      - run:
+          name: Build and deploy docker image
+          command: |
+            docker login --username $DOCKERUSERNAME --password $DOCKERPASS
+            ./build_and_push_docker.sh
+
+    # Create EKS cluster
+      - run:
+          name: Create EKS cluster
+          command: |
+            ./create_cluster.sh
+
+    # Deploy docker image to EKS cluster
+      - run:
+          name: Deploy EKS image
+          command: |
+            ./run_kubernetes.sh
+
+    # Cleanup
+      - run:
+          name: Cleanup
+          command: |
+            eksctl delete cluster prod
