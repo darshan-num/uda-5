@@ -47,14 +47,7 @@ jobs:
       - run:
           name: Install cli 2, docker & eksctl
           command: |
-            pwd
-            ls
-            sudo apt-get install docker-ce docker-ce-cli containerd.io
-            apt-cache madison docker-ce
-            
-            curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-            sudo mv /tmp/eksctl /usr/local/bin
-            eksctl version
+            ./install_dependencies.sh
     # Build Docker image
       - run:
           name: Build and deploy docker image
