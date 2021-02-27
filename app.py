@@ -68,10 +68,10 @@ def predict():
     # Log the output prediction value
     LOG.info(f"Prediction output: \n{prediction}")
 
-    return jsonify({'prediction': prediction})
+    return jsonify({'prediction': prediction})))
 
 
 if __name__ == "__main__":
     # load pretrained model as clf
-    clf = joblib.load("./model_data/boston_housing_prediction.joblib")
+    clf=joblib.load("./model_data/boston_housing_prediction.joblib")
     app.run(host='0.0.0.0', port=80, debug=True)  # specify port=80
