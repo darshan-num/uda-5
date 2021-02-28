@@ -83,6 +83,7 @@ jobs:
           name: Test cluster
 
   create-deployment:
+    working_directory: ~/repo
     executor: aws-eks/python3
     parameters:
       cluster-name:
