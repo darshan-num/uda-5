@@ -45,6 +45,7 @@ jobs:
       - run:
           name: Build and push docker image
           command: |
+            docker login --username $DOCKERUSERNAME --password $DOCKERPASS
             chmod +x build_and_push_docker.sh
             ./build_and_push_docker.sh
             
