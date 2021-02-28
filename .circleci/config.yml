@@ -8,6 +8,9 @@ jobs:
     docker:
       # Use the same Docker base as the project
       - image: python:3.7.3-stretch
+        auth:
+          username: $DOCKERUSERNAME
+          password: $DOCKERPASS
 
       - image: circleci/golang:1.15
         auth:
@@ -25,7 +28,7 @@ jobs:
             docker tag dashapi dashnum/dash-uda-4
             docker login --username $DOCKERUSERNAME --password $DOCKERPASS
             docker push dashnum/dash-uda-4
-            
+
       - run:
           name: install dependencies
           command: |
