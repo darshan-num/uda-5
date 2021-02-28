@@ -102,20 +102,20 @@ workflows:
       #     requires:
       #       - build-and-lint-files
 
-      - aws-eks/create-cluster:
-          cluster-name: prod2
+      # - aws-eks/create-cluster:
+      #     cluster-name: prod2
           # requires:
           #   - build-and-push-docker
 
       - test-cluster:
           cluster-name: prod2
-          requires:
-            - aws-eks/create-cluster
+          # requires:
+          #   - aws-eks/create-cluster
 
       - create-deployment:
           cluster-name: prod2
           requires:
-            - aws-eks/create-cluster
+            - test-cluster
             
       - aws-eks/update-container-image:
           cluster-name: prod2
