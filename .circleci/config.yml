@@ -28,7 +28,7 @@ jobs:
               make install
               wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
               chmod +x /bin/hadolint
-              
+
         - run:
             name: install additional dependencies
             command: |
@@ -55,7 +55,9 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            docker info
+            docker login --username $DOCKERUSERNAME --password $DOCKERPASS
+            chmod +x build_and_push_docker.sh
+            ./build_and_push_docker.sh
     
 
 workflows:
