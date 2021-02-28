@@ -1,6 +1,9 @@
 # CircleCi Status:
 [![CircleCI](https://circleci.com/gh/darshan-num/uda-4.svg?style=svg&circle-token=7e613b703addd9331f2fb97a952fbb25cfea4810)](https://app.circleci.com/pipelines/github/darshan-num/uda-4?branch=develop)
 
+## Github repo link
+https://github.com/darshan-num/uda-5/tree/develop
+
 ## Project Summary
 This project's goal is to operationalize this working, machine learning microservice using kubernetes.
 In this project we have:

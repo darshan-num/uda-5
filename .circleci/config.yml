@@ -5,9 +5,9 @@
 version: 2
 jobs:
   build:
-    docker:
-      # Use the same Docker base as the project
-      - image: python:3.7.3-stretch
+# docker:
+#   # Use the same Docker base as the project
+#   - image: python:3.7.3-stretch
 
     working_directory: ~/repo
 
@@ -15,6 +15,13 @@ jobs:
       - checkout
       - setup_remote_docker:
           version: 19.03.13
+
+      - run:
+          name: Build and push docker image
+          command: |
+            docker login --username $DOCKERUSERNAME --password $DOCKERPASS
+            chmod +x build_and_push_docker.sh
+            ./build_and_push_docker.sh
     # Download and cache dependencies
       - restore_cache:
           keys:
@@ -40,15 +47,7 @@ jobs:
           command: |
             wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
             tar xf kubeval-linux-amd64.tar.gz
-            cp kubeval /usr/local/bin
-
-      - run:
-          name: Build and push docker image
-          command: |
-            docker login --username $DOCKERUSERNAME --password $DOCKERPASS
-            chmod +x build_and_push_docker.sh
-            ./build_and_push_docker.sh
-            
+            cp kubeval /usr/local/bin      
     # run lint!
       - run:
           name: run lint
