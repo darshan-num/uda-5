@@ -53,12 +53,49 @@ jobs:
       steps:
       - checkout
       - run:
-          name: install dependencies
+          name: Build and push to dockerhub
           command: |
             docker login --username $DOCKERUSERNAME --password $DOCKERPASS
             chmod +x build_and_push_docker.sh
             ./build_and_push_docker.sh
-    
+  
+  test-cluster:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: |
+          Name of the EKS cluster
+        type: string
+    steps:
+      - kubernetes/install
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+      - run:
+          command: |
+            kubectl get services
+          name: Test cluster
+
+  create-deployment:
+    executor: aws-eks/python3
+    parameters:
+      cluster-name:
+        description: |
+          Name of the EKS cluster
+        type: string
+    steps:
+      - checkout
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+          install-kubectl: true
+      - kubernetes/create-or-update-resource:
+          get-rollout-status: true
+          resource-file-path: eks-cluster.yml
+          resource-name: deployment/dashapi
+
+
+orbs:
+  aws-eks: circleci/aws-eks@0.2.3
+  kubernetes: circleci/kubernetes@0.4.0
 
 workflows:
   version: 2
@@ -69,3 +106,34 @@ workflows:
       - build-and-push-docker:
           requires:
             - build-and-lint-files
+
+      - aws-eks/create-cluster:
+          cluster-name: prod
+
+      - test-cluster:
+          cluster-name: prod
+          requires:
+            - aws-eks/create-cluster
+      
+      - create-deployment:
+          cluster-name: prod
+          requires:
+            - aws-eks/create-cluster
+
+      - aws-eks/update-container-image:
+          cluster-name: prod
+          container-image-updates: 'nginx=nginx:1.9.1'
+          post-steps:
+            - kubernetes/delete-resource:
+                resource-names: dashapi
+                resource-types: deployment
+                wait: true
+          record: true
+          requires:
+            - create-deployment
+          resource-name: deployment/dashapi
+
+      - aws-eks/delete-cluster:
+          cluster-name: prod
+          requires:
+            - test-cluster
