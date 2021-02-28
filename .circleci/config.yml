@@ -92,6 +92,13 @@ jobs:
         type: string
     steps:
       - checkout
+      - run:
+          command: |
+            chmod +x install_cli.sh
+            ./install_cli.sh
+            aws configure set aws_access_key_id $AWS_ACCESS_KEY
+            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+
       - aws-eks/update-kubeconfig-with-authenticator:
           cluster-name: << parameters.cluster-name >>
           install-kubectl: true
@@ -119,15 +126,15 @@ workflows:
           # requires:
           #   - build-and-push-docker
 
-      - test-cluster:
-          cluster-name: prod2
+      # - test-cluster:
+      #     cluster-name: prod2
           # requires:
           #   - aws-eks/create-cluster
 
       - create-deployment:
           cluster-name: prod2
-          requires:
-            - test-cluster
+          # requires:
+          #   - test-cluster
             
       - aws-eks/update-container-image:
           cluster-name: prod2
