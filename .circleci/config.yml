@@ -18,7 +18,6 @@ jobs:
       - run:
           name: Build and push docker image
           command: |
-            ssh remote-docker
             docker build -t dashapi .
             docker tag dashapi dashnum/dash-uda-4
             docker login --username $DOCKERUSERNAME --password $DOCKERPASS
