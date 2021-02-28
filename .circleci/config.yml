@@ -99,13 +99,11 @@ jobs:
             aws configure set aws_access_key_id $AWS_ACCESS_KEY
             aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
 
-      - aws-eks/update-kubeconfig-with-authenticator:
-          cluster-name: << parameters.cluster-name >>
-          install-kubectl: true
-      - kubernetes/create-or-update-resource:
-          get-rollout-status: true
-          resource-file-path: eks-cluster.yml
-          resource-name: deployment/nginx-deployment
+      - run:
+          command: |
+            chmod +x run_kubernetes.sh
+            ./run_kubernetes.sh
+
 
 orbs:
   aws-eks: circleci/aws-eks@0.2.3
@@ -115,41 +113,28 @@ version: 2.1
 workflows:
   deployment:
     jobs:
-      # - build-and-lint-files
+      - build-and-lint-files
 
-      # - build-and-push-docker:
-      #     requires:
-      #       - build-and-lint-files
+      - build-and-push-docker:
+          requires:
+            - build-and-lint-files
 
-      # - aws-eks/create-cluster:
-      #     cluster-name: prod2
-          # requires:
-          #   - build-and-push-docker
+      - aws-eks/create-cluster:
+          cluster-name: prod
+          requires:
+            - build-and-push-docker
 
-      # - test-cluster:
-      #     cluster-name: prod2
-          # requires:
-          #   - aws-eks/create-cluster
+      - test-cluster:
+          cluster-name: prod
+          requires:
+            - aws-eks/create-cluster
 
       - create-deployment:
-          cluster-name: prod2
-          # requires:
-          #   - test-cluster
-            
-      - aws-eks/update-container-image:
-          cluster-name: prod2
-          container-image-updates: 'nginx=nginx:1.9.1'
-          post-steps:
-            - kubernetes/delete-resource:
-                resource-names: nginx-deployment
-                resource-types: deployment
-                wait: true
-          record: true
+          cluster-name: prod
           requires:
-            - create-deployment
-          resource-name: nginx-deployment/dashapi
-
+            - test-cluster
+            
       - aws-eks/delete-cluster:
-          cluster-name: prod2
+          cluster-name: prod
           requires:
             - aws-eks/update-container-image

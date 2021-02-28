@@ -4,12 +4,12 @@
 # aws ecs describe-clusters --cluster default | jq . > output_arn.json
 # clusterarn=jq ".clusters[].clusterArn" output_arn.json
 # echo $clusterarn
-clusterarn=arn:aws:eks:us-east-2:450295081108:cluster/prod
+clusterarn=arn:aws:eks:us-east-2:450295081108:cluster/prod2
 
 # Step 2:
 # Assign variables
 dockerpath=dashnum/dash-uda-4:commit1
-clustername=prod
+clustername=prod2
 
 # Step 3
 # Update kubeconfig
@@ -27,4 +27,3 @@ sleep 10
 # Step 6:
 # Get nodes and test
 kubectl get nodes
-kubectl get deployments
