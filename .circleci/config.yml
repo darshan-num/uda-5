@@ -104,6 +104,8 @@ workflows:
 
       - aws-eks/create-cluster:
           cluster-name: prod
+          requires:
+            - build-and-push-docker
 
       - test-cluster:
           cluster-name: prod
