@@ -5,25 +5,30 @@
 version: 2
 jobs:
   build:
-# docker:
-#   # Use the same Docker base as the project
-#   - image: python:3.7.3-stretch
+    docker:
+      # Use the same Docker base as the project
+      - image: python:3.7.3-stretch
 
-# wget http://security.ubuntu.com/ubuntu/pool/main/a/apt/apt_1.0.1ubuntu2.17_amd64.deb -O apt.deb
-# pkexec dpkg -i apt.deb
-    machine: true
+      - image: circleci/golang:1.15
+        auth:
+          username: $DOCKERUSERNAME
+          password: $DOCKERPASS
+
+
     working_directory: ~/repo
     steps:
-      - checkout          
+      - checkout
+      - run:
+          name: Build and push docker image
+          command: |
+            docker build -t dashapi .
+            docker tag dashapi dashnum/dash-uda-4
+            docker login --username $DOCKERUSERNAME --password $DOCKERPASS
+            docker push dashnum/dash-uda-4
+            
       - run:
           name: install dependencies
           command: |
-            wget http://www.python.org/ftp/python/3.3.5/Python-3.3.5.tar.xz
-            tar xJf ./Python-3.3.5.tar.xz
-            cd ./Python-3.3.5
-            ./configure --prefix=/opt/python3.3
-            make && make install
-
             python3 -m venv venv
             . venv/bin/activate
             make install
@@ -42,11 +47,3 @@ jobs:
           command: |
             . venv/bin/activate
             make lint 
-
-      - run:
-          name: Build and push docker image
-          command: |
-            docker build -t dashapi .
-            docker tag dashapi dashnum/dash-uda-4
-            docker login --username $DOCKERUSERNAME --password $DOCKERPASS
-            docker push dashnum/dash-uda-4
