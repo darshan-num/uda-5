@@ -96,16 +96,16 @@ version: 2.1
 workflows:
   deployment:
     jobs:
-      - build-and-lint-files
+      # - build-and-lint-files
 
-      - build-and-push-docker:
-          requires:
-            - build-and-lint-files
+      # - build-and-push-docker:
+      #     requires:
+      #       - build-and-lint-files
 
       - aws-eks/create-cluster:
           cluster-name: prod
-          requires:
-            - build-and-push-docker
+          # requires:
+          #   - build-and-push-docker
 
       - test-cluster:
           cluster-name: prod
