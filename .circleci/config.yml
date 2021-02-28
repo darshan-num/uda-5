@@ -5,9 +5,9 @@
 version: 2
 jobs:
   build:
-# docker:
-#   # Use the same Docker base as the project
-#   - image: python:3.7.3-stretch
+    docker:
+      # Use the same Docker base as the project
+      - image: python:3.7.3-stretch
 
     working_directory: ~/repo
 
@@ -15,13 +15,15 @@ jobs:
       - checkout
       - setup_remote_docker:
           version: 19.03.13
-
+          
       - run:
           name: Build and push docker image
           command: |
+            docker build -t dashapi .
+            docker tag dashapi dashnum/dash-uda-4
             docker login --username $DOCKERUSERNAME --password $DOCKERPASS
-            chmod +x build_and_push_docker.sh
-            ./build_and_push_docker.sh
+# chmod +x build_and_push_docker.sh
+# ./build_and_push_docker.sh
     # Download and cache dependencies
       - restore_cache:
           keys:
