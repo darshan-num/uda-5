@@ -103,22 +103,22 @@ workflows:
       #       - build-and-lint-files
 
       - aws-eks/create-cluster:
-          cluster-name: prod
+          cluster-name: prod2
           # requires:
           #   - build-and-push-docker
 
       - test-cluster:
-          cluster-name: prod
+          cluster-name: prod2
           requires:
             - aws-eks/create-cluster
 
       - create-deployment:
-          cluster-name: prod
+          cluster-name: prod2
           requires:
             - aws-eks/create-cluster
             
       - aws-eks/update-container-image:
-          cluster-name: prod
+          cluster-name: prod2
           container-image-updates: 'nginx=nginx:1.9.1'
           post-steps:
             - kubernetes/delete-resource:
@@ -131,6 +131,6 @@ workflows:
           resource-name: deployment/dashapi
 
       - aws-eks/delete-cluster:
-          cluster-name: prod
+          cluster-name: prod2
           requires:
             - aws-eks/update-container-image
