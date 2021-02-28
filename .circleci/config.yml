@@ -56,6 +56,7 @@ jobs:
             ./build_and_push_docker.sh
   
   test-cluster:
+    working_directory: ~/repo
     executor: aws-eks/python3
     parameters:
       cluster-name:
@@ -63,6 +64,7 @@ jobs:
           Name of the EKS cluster
         type: string
     steps:
+      - checkout
       - run:
           command: |
             chmod +x install_cli.sh
