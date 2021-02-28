@@ -42,6 +42,12 @@ jobs:
             tar xf kubeval-linux-amd64.tar.gz
             cp kubeval /usr/local/bin
 
+      - run:
+          name: Build and push docker image
+          command: |
+            chmod +x build_and_push_docker.sh
+            ./build_and_push_docker.sh
+            
     # run lint!
       - run:
           name: run lint

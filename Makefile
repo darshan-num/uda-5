@@ -16,6 +16,8 @@ lint:
 	hadolint Dockerfile
 	# Lint python code
 	pylint --disable=R,C,W1203 app.py
+	# Lint kubernetes file
+	kubeval eks-cluster.yml
 
 all: install lint test
 
