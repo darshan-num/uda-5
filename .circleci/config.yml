@@ -5,16 +5,15 @@
 version: 2
 jobs:
   build:
-    docker:
-      # Use the same Docker base as the project
-      - image: python:3.7.3-stretch
-
+# docker:
+#   # Use the same Docker base as the project
+#   - image: python:3.7.3-stretch
+    machine: true
     working_directory: ~/repo
-
     steps:
       - checkout
-      - setup_remote_docker:
-          version: 19.03.13
+# - setup_remote_docker:
+#     version: 19.03.13
           
       - run:
           name: Build and push docker image
