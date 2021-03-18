@@ -1,140 +1,201 @@
-jobs:
-  build-and-lint-files:
-      docker:
-        # Use the same Docker base as the project
-        - image: python:3.7.3-stretch
-
-      working_directory: ~/repo
-
-      steps:
-        - checkout
-
-      # Download and cache dependencies
-        - restore_cache:
-            keys:
-              - v1-dependencies-{{ checksum "requirements.txt" }}
-              # fallback to using the latest cache if no exact match is found
-              - v1-dependencies-
-
-        - run:
-            name: install dependencies
-            command: |
-              python3 -m venv venv
-              . venv/bin/activate
-              make install
-              wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
-              chmod +x /bin/hadolint
-
-        - run:
-            name: install additional dependencies
-            command: |
-              wget https://github.com/instrumenta/kubeval/releases/latest/download/kubeval-linux-amd64.tar.gz
-              tar xf kubeval-linux-amd64.tar.gz
-              cp kubeval /usr/local/bin
-
-        - save_cache:
-            paths:
-              - ./venv
-            key: v1-dependencies-{{ checksum "requirements.txt" }}
-
-      # run lint!
-        - run:
-            name: run lint
-            command: |
-              . venv/bin/activate
-              make lint 
-
-  build-and-push-docker:
-      machine: true
-      steps:
-      - checkout
-      - run:
-          name: Build and push to dockerhub
-          command: |
-            docker login --username $DOCKERUSERNAME --password $DOCKERPASS
-            chmod +x build_and_push_docker.sh
-            ./build_and_push_docker.sh
-  
-  test-cluster:
-    working_directory: ~/repo
-    executor: aws-eks/python3
-    parameters:
-      cluster-name:
-        description: |
-          Name of the EKS cluster
-        type: string
-    steps:
-      - checkout
-      - run:
-          command: |
-            chmod +x install_cli.sh
-            ./install_cli.sh
-            aws configure set aws_access_key_id $AWS_ACCESS_KEY
-            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-
-      - kubernetes/install
-
-      - aws-eks/update-kubeconfig-with-authenticator:
-          cluster-name: << parameters.cluster-name >>
-
-      - run:
-          command: |
-            kubectl get services
-          name: Test cluster
-
-  create-deployment:
-    working_directory: ~/repo
-    executor: aws-eks/python3
-    parameters:
-      cluster-name:
-        description: |
-          Name of the EKS cluster
-        type: string
-    steps:
-      - checkout
-      - run:
-          command: |
-            chmod +x install_cli.sh
-            ./install_cli.sh
-            aws configure set aws_access_key_id $AWS_ACCESS_KEY
-            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-
-      - run:
-          command: |
-            chmod +x run_kubernetes.sh
-            ./run_kubernetes.sh
-
+version: 2.1
 
 orbs:
-  aws-eks: circleci/aws-eks@0.2.3
-  kubernetes: circleci/kubernetes@0.4.0
+  aws-s3: circleci/aws-s3@1.0.0
+  aws-cli: circleci/aws-cli@0.1.19
+  slack: circleci/slack@3.4.2
 
-version: 2.1
+commands:
+  git_tag:
+    description: "Tagging the new commit which will be a result of Branch A --(merge)--> Branch B"
+    parameters:
+      tag_message:
+        type: string
+
+      working_commit:
+        type: string
+
+    steps:
+      - run:
+          name: Update Tags
+          command: |
+            git tag -a << parameters.tag_message >> << parameters.working_commit >> -m << parameters.tag_message >>
+            git push origin << parameters.tag_message >>
+
+jobs:
+  build-and-deploy-dev:
+    docker:
+      - image: circleci/python:3.6.1
+    working_directory: ~/repo
+    steps:
+      - run:
+          name: Avoid hosts unknown for github
+          command: mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+      - checkout
+
+      - run:
+          name: Running jobs
+          command: |
+            echo "job 1"
+
+  ############# Build and deploy Dev Training #############
+  build-and-deploy-dev-training:
+    docker:
+      - image: circleci/python:3.6.1
+    working_directory: ~/repo
+    steps:
+      - run:
+          name: Avoid hosts unknown for github
+          command: mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+      - checkout
+
+      - run:
+          name: Running jobs
+          command: |
+            echo "job 1"
+
+  ############# Build and deploy Stage Training #############
+  build-and-deploy-stage-training:
+    docker:
+      - image: circleci/python:3.6.1
+    working_directory: ~/repo
+    steps:
+      - run:
+          name: Avoid hosts unknown for github
+          command: mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+      - checkout
+
+      - run:
+          name: Running jobs
+          command: |
+            echo "job 1"
+
+  ######################################   TEST  ###################
+  build-and-deploy-test:
+    docker:
+      - image: circleci/python:3.6.1
+    working_directory: ~/repo
+    steps:
+      - checkout
+
+      - run:
+          name: Running jobs
+          command: |
+            echo "job 1"
+
+      - git_tag:
+          tag_message: test-$CIRCLE_BUILD_NUM
+          working_commit: $CIRCLE_SHA1
+
+
+
+  ######################################   PRESTAGE  ############################
+  build-and-deploy-prestage:
+    docker:
+      - image: circleci/python:3.6.1
+    working_directory: ~/repo
+    steps:
+      - checkout
+
+      - run:
+          name: Running jobs
+          command: |
+            echo "job 1"
+
+      - git_tag:
+          tag_message: $CIRCLE_BRANCH-$CIRCLE_BUILD_NUM
+          working_commit: $CIRCLE_SHA1
+
+
+  ###################  STAGE #################################################
+  build-and-deploy-stage:
+    docker:
+      - image: circleci/python:3.6.1
+    working_directory: ~/repo
+    steps:
+      - checkout
+
+      - run:
+          name: Running jobs
+          command: |
+            echo "job 1"
+
+      - git_tag:
+          tag_message: $CIRCLE_BRANCH-$CIRCLE_BUILD_NUM
+          working_commit: $CIRCLE_SHA1
+
+
+  ######################## ON PR Generation #################################
+  build-and-test-PR:
+    docker:
+      - image: circleci/python:3.6.1
+    working_directory: ~/repo
+    steps:
+      - run:
+          name: Avoid hosts unknown for github
+          command: mkdir ~/.ssh/ && echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+      - checkout
+
+      - run:
+          name: Running jobs
+          command: |
+            echo "job 1"
+      
+
 workflows:
-  deployment:
+  version: 2
+  BuildAndDeployDev_to_Test:
     jobs:
-      - build-and-lint-files
+      - build-and-test-PR:
+            filters:
+              branches:
+                ignore:
+                  - develop
+                  - master
 
-      - build-and-push-docker:
-          requires:
-            - build-and-lint-files
+      - build-and-deploy-dev:
+          filters:
+            branches:
+              only:
+                - develop
 
-      - aws-eks/create-cluster:
-          cluster-name: prod
+      - hold_for_approval_dev:
+          type: approval
           requires:
-            - build-and-push-docker
+            - build-and-deploy-dev
 
-      - test-cluster:
-          cluster-name: prod
+      - build-and-deploy-test:
+          filters:
+            branches:
+              only:
+                - develop
           requires:
-            - aws-eks/create-cluster
+            - hold_for_approval_dev
 
-      - create-deployment:
-          cluster-name: prod
-          requires:
-            - test-cluster
-            
-      - aws-eks/delete-cluster:
-          cluster-name: prod
-          requires:
-            - create-deployment
+  BuildAndDeployRelease_to_Master:
+    jobs:
+      - build-and-deploy-prestage:
+          filters:
+            branches:
+              only: /^release\/.*/
+
+      - build-and-deploy-stage:
+          filters:
+            branches:
+              only:
+                - master
+
+  BuildAndDeployTraining:
+    jobs:
+      - build-and-deploy-dev-training:
+         filters:
+           branches:
+             only: /^training-dev\/.*/
+
+      - build-and-deploy-stage-training:
+         filters:
+           branches:
+             only: /^training-stage\/.*/
