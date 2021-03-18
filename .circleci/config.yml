@@ -16,6 +16,9 @@ commands:
         type: string
 
     steps:
+       - add_ssh_keys:
+          fingerprints:
+            - "0a:26:cc:b9:5b:0d:b7:3b:93:45:ef:9a:15:be:c8:2a"
       - run:
           name: Update Tags
           command: |
