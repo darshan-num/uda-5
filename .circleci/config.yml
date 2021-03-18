@@ -15,12 +15,10 @@ commands:
       working_commit:
         type: string
 
-    steps:
-       - add_ssh_keys:
-          fingerprints:
-            - "0a:26:cc:b9:5b:0d:b7:3b:93:45:ef:9a:15:be:c8:2a"
+    steps:       
       - run:
           name: Update Tags
+          
           command: |
             git tag -a << parameters.tag_message >> << parameters.working_commit >> -m << parameters.tag_message >>
             git push origin << parameters.tag_message >>
@@ -80,8 +78,13 @@ jobs:
     docker:
       - image: circleci/python:3.6.1
     working_directory: ~/repo
+
     steps:
       - checkout
+
+      - add_ssh_keys:
+          fingerprints:
+            - "0a:26:cc:b9:5b:0d:b7:3b:93:45:ef:9a:15:be:c8:2a"
 
       - run:
           name: Running jobs
