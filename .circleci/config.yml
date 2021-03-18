@@ -83,11 +83,7 @@ jobs:
 
     steps:
       - checkout
-
-      - add_ssh_keys:
-          fingerprints:
-            - "e8:ce:df:93:8a:0e:d6:92:e9:3a:39:83:77:b5:c5:60"
-
+      
       - run:
           name: Running jobs
           command: |
