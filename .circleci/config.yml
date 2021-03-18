@@ -22,6 +22,8 @@ commands:
       - run:
           name: Update Tags
           command: |
+            git config user.email "darshan.sheth@numerator.com"
+            git config user.name "darshan-num"
             git tag -a << parameters.tag_message >> << parameters.working_commit >> -m << parameters.tag_message >>
             git push origin << parameters.tag_message >>
 
